@@ -1,0 +1,39 @@
+﻿@{
+    ViewBag.Title = "Вход";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/css/Login.css" />
+    <script src="~/js/site.js"></script>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Вход в систему</h2>
+
+        <form asp-action="Login" method="post">
+            <div>
+                <label for="email">Email</label>
+                <input type="email" name="email" required />
+            </div>
+            <div>
+                <label for="password">Пароль</label>
+                <input type="password" name="password" required />
+            </div>
+            <div>
+                <button type="submit">Войти</button>
+            </div>
+            @if (ViewBag.Error != null)
+            {
+                <p class="error-message">@ViewBag.Error</p>
+            }
+        </form>
+    </div>
+</body>
+
+
+</html>

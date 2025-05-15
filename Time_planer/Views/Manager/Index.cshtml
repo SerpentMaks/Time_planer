@@ -1,0 +1,184 @@
+﻿@model Time_planer.Models.ManagerDashboardViewModel
+@{
+    ViewBag.Title = "Панель менеджера";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>@ViewBag.Title</title>
+    <script src="animations.js"></script>
+    <link rel="stylesheet" href="~/css/styles.css" />
+
+</head>
+<body>
+    @functions {
+        public string FormatHours(decimal hours)
+        {
+            var rounded = Math.Round(hours, 2);
+            int value = (int)Math.Floor(rounded);
+            string suffix;
+
+            
+                suffix = "час.";
+            
+
+            return $"{rounded} {suffix}";
+        }
+    }
+
+    @{
+        var filter = Context.Request.Query["filter"].ToString();
+    }
+
+    <div style="position: absolute; top: 10px; right: 20px;">
+        <a asp-controller="Account" asp-action="Logout" class="btn" method="post">Выйти</a>
+    </div>
+    <div class="container">
+            <div class="card">
+                <h2>Фильтр сотрудников</h2>
+                <form method="get" asp-action="Index" class="form-container">
+                    <input type="text" name="searchName" placeholder="Имя сотрудника" />
+                    <label>С:</label>
+                    <input type="date" name="start" value="@Model.CustomStart?.ToString("yyyy-MM-dd")" />
+                    <label>По:</label>
+                    <input type="date" name="end" value="@Model.CustomEnd?.ToString("yyyy-MM-dd")" />
+                    <button type="submit" class="btn">Фильтровать</button>
+                </form>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Имя</th>
+                        <th>Всего</th>
+                        <th>Неделя</th>
+                        <th>Месяц</th>
+                        <th>Год</th>
+                        <th>Выбранное</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var stat in Model.TimeStats)
+                    {
+                        <tr>
+                            <td>
+                                
+                                    @stat.Name
+                            
+                            </td>
+                            <td>@FormatHours(stat.TotalHours)</td>
+                            <td>
+                                @FormatHours(stat.ThisWeekHours)
+                            </td>
+                            <td>
+                                @FormatHours(stat.ThisMonthHours)
+                            </td>
+                            <td>
+                                @FormatHours(stat.ThisYearHours)
+                            </td>
+                            <td>
+                                @FormatHours(stat.CustomPeriodHours)
+                            </td>
+                            
+                        </tr>
+                    }
+                </tbody>
+                
+
+            </table>
+            <div id="pagination" class="pagination">
+                
+            </div>
+
+        </div>
+        </div>
+
+        <div class="card">
+            <h2>Заявки на отпуск</h2>
+        <div class="form-container" style="margin-bottom: 10px;">
+            <form method="get" asp-action="Index">
+                <input type="hidden" name="filter" value="new" />
+                <button type="submit" class="btn @(filter != "processed" ? "btn-success" : "")">Новые заявки</button>
+            </form>
+
+            <form method="get" asp-action="Index">
+                <input type="hidden" name="filter" value="processed" />
+                <button type="submit" class="btn @(filter == "processed" ? "btn-success" : "")">Одобренные/Отклонённые</button>
+            </form>
+        </div>
+
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Сотрудник</th>
+                        <th>Осталось отпускных дней</th>
+                        <th>Тип</th>
+                        <th>С</th>
+                        <th>По</th>
+                        <th>Статус</th>
+                        <th>Действие</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model.LeaveRequests)
+                {
+                    var leave = item.Leave;
+                    <tr class="@(leave.Status == "Ожидает" && item.RequestedDays > item.RemainingDays ? "warning-row" :
+             leave.Status == "Ожидает" && item.RemainingDays == 0 ? "danger-row" : "")">
+
+
+                        <td style="@(leave.Status == "Ожидает" && item.RemainingDays == 0 ? "color: crimson; font-weight: bold;" : "")">
+                            @leave.User.FirstName @leave.User.LastName
+                        </td>
+
+
+                        <td>
+                            @item.RemainingDays
+                            @if (leave.Status == "Ожидает" && item.RequestedDays > item.RemainingDays)
+                            {
+                                <div style="color: #d35400; font-weight: bold;">⚠ Запрошено: @item.RequestedDays</div>
+                            }
+                        </td>
+
+
+                        <td>@leave.LeaveType</td>
+                        <td>@leave.StartDate.ToShortDateString()</td>
+                        <td>@leave.EndDate.ToShortDateString()</td>
+                        <td>@leave.Status</td>
+                        <td>
+                            @if (leave.Status == "Ожидает")
+                            {
+                                <form asp-action="Approve" method="post" style="display:inline;">
+                                    <input type="hidden" name="leaveId" value="@leave.LeaveId" />
+                                    <button type="submit" class="btn btn-success">Одобрить</button>
+                                </form>
+                                <form asp-action="Reject" method="post" style="display:inline;">
+                                    <input type="hidden" name="leaveId" value="@leave.LeaveId" />
+                                    <button type="submit" class="btn btn-danger">Отклонить</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+                    </tr>
+                }
+
+                    
+                </tbody>
+            </table>
+        <div id="pagination" class="pagination">
+            
+        </div>
+
+        </div>
+    
+
+    </div>
+</body>
+
+
+
+</html>

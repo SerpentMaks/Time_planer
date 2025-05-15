@@ -1,0 +1,105 @@
+﻿@model List<Time_planer.Models.WorkTimeEntry>
+
+@{
+    ViewBag.Title = "Редактирование времени сотрудников";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/css/styles.css" />
+    <script src="animations.js"></script>
+</head>
+<body>
+    @functions {
+        public string FormatHours(decimal? hours)
+        {
+            var rounded = Math.Round(hours.Value, 2);
+            int value = (int)Math.Floor(rounded);
+            string suffix;
+
+
+            suffix = "час.";
+
+
+            return $"{rounded} {suffix}";
+        }
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div style="background-color: crimson; padding: 15px; border-radius: 8px; margin-bottom: 20px; color: white;">
+            @TempData["Error"]
+        </div>
+    }
+    <div style="position: absolute; top: 10px; right: 20px;">
+        <a asp-controller="Account" asp-action="Logout" class="btn" method="post">Выйти</a>
+    </div>
+    <div class="container">
+        <div style="position: absolute; top: -30px; left: 25px;">
+        <a asp-controller="Admin" asp-action="Index" class="btn">← Назад к пользователям</a>
+        </div>
+        <div class="card">
+            <h2>Записи рабочего времени</h2>
+            
+                
+                <form method="get" asp-action="WorkTime" class="form-container">
+                    <input type="text" name="searchName" placeholder="Имя сотрудника или регистратора" />
+                    <input type="date" name="searchDate" />
+                    <button type="submit" class="btn">Поиск</button>
+                </form>
+            
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Сотрудник</th>
+                        <th>Регистратор</th>
+                        <th>Начало</th>
+                        <th>Окончание</th>
+                        <th>Часы</th>
+                        <th>Редактировать</th>
+                        <th>Удалить</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model)
+                    {
+                        <tr>
+                            <td>@entry.User.FirstName @entry.User.LastName</td>
+                            <td>@entry.Registrar?.FirstName @entry.Registrar?.LastName</td>
+                            <td>@entry.StartTime.ToString("g")</td>
+                            <td>@(entry.EndTime?.ToString("g") ?? "-")</td>
+                            <td>@(FormatHours(entry.TotalHours) ?? "-")</td>
+
+                            <td>
+                                <form asp-action="EditWorkTime" method="post">
+                                    <input type="hidden" name="entryId" value="@entry.EntryId" />
+                                    <input type="datetime-local" name="startTime" value="@entry.StartTime.ToString("yyyy-MM-ddTHH:mm")" required />
+                                    <input type="datetime-local" name="endTime" value="@entry.EndTime?.ToString("yyyy-MM-ddTHH:mm")" required />
+                                    <button type="submit" class="btn">Сохранить</button>
+                                </form>
+                            </td>
+                            <td>
+                                <form asp-action="DeleteWorkTime" method="post">
+                                    <input type="hidden" name="entryId" value="@entry.EntryId" />
+                                    <button type="submit" class="btn" style="background-color: crimson;">Удалить</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div id="pagination" class="pagination">
+               
+            </div>
+
+
+            
+        </div>
+    </div>
+    </div>
+</body>
+</html>

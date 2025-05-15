@@ -1,0 +1,102 @@
+﻿@model List<Time_planer.Models.User>
+
+@{
+    var activeEntries = (Dictionary<int, DateTime>)ViewBag.ActiveEntries;
+    ViewBag.Title = "Регистрация рабочего времени";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/css/styles.css" />
+
+</head>
+<body>
+    <div style="position: absolute; top: 10px; right: 20px;">
+        <a asp-controller="Account" asp-action="Logout" class="btn" method="post">Выйти</a>
+    </div>
+    <div class="container">
+        <div class="card">
+            <h2>Регистрация времени сотрудников</h2>
+            
+                <form method="get" asp-action="Index" class="form-container">
+                    <input type="text" name="searchName" placeholder="Имя сотрудника" />
+                    <button type="submit" class="btn">Поиск</button>
+                </form>
+           
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Имя</th>
+                        <th>Email</th>
+                        <th>Статус</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var employee in Model)
+                    {
+                        var isWorking = activeEntries.ContainsKey(employee.UserId);
+                        <tr>
+                            <td>@employee.FirstName @employee.LastName</td>
+                            <td>@employee.Email</td>
+                            <td>
+                                @if (isWorking)
+                                {
+                                    <strong>Начало: @activeEntries[employee.UserId].ToString("g")</strong>
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!isWorking)
+                                {
+                                    <form asp-action="StartWork" method="post" style="display:inline;">
+                                        <input type="hidden" name="userId" value="@employee.UserId" />
+                                        <button type="submit" class="btn">Начать</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="EndWork" method="post" style="display:inline;">
+                                        <input type="hidden" name="userId" value="@employee.UserId" />
+                                        <button type="submit" class="btn">Закончить</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div id="pagination" class="pagination">
+               
+            </div>
+
+        </div>
+        </div>
+    </div>
+
+    <div id="notification">@TempData["Notification"]</div>
+
+    <script>
+            window.onload = function () {
+            var notif = document.getElementById('notification');
+            if (notif.textContent.trim() !== '') {
+                notif.classList.add('show');
+
+                setTimeout(function () {
+                    notif.classList.add('hide');
+                    setTimeout(function () {
+                        notif.style.display = 'none';
+                    }, 500); 
+                }, 5000); 
+            }
+        }
+    </script>
+</body>
+</html>

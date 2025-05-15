@@ -1,0 +1,108 @@
+﻿
+    @model List<Time_planer.Models.User>
+
+@{
+    ViewBag.Title = "Администрирование пользователей";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/css/styles.css" />
+    <script src="animations.js"></script>
+</head>
+<body>
+    <div style="position: absolute; top: 10px; right: 20px;">
+        <a asp-controller="Account" asp-action="Logout" class="btn" method="post">Выйти</a>
+    </div>
+    <div class="container">
+        <div style="position: absolute; top: -30px; left: 25px;">
+        <a asp-controller="Admin" asp-action="WorkTime" class="btn">Перейти к редактированию времени сотрудников</a>
+        </div>
+        <div class="card">
+            <button type="button" id="toggleUserForm" class="btn" style="margin-bottom: 15px;">Новый пользователь</button>
+
+            <div id="addUserSection" class="collapsible-form">
+                <h2>Добавить нового пользователя</h2>
+                <form asp-action="AddUser" method="post" class="form-container">
+                    <input type="text" name="firstName" placeholder="Имя" required />
+                    <input type="text" name="lastName" placeholder="Фамилия" required />
+                    <input type="email" name="email" placeholder="Email" required />
+                    <input type="password" name="password" placeholder="Пароль" required />
+                    <select name="roleId" required>
+                        <option value="1">Сотрудник</option>
+                        <option value="2">Регистратор</option>
+                        <option value="3">Менеджер</option>
+                        <option value="4">Администратор</option>
+                    </select>
+                    <button type="submit" class="btn">Добавить</button>
+                </form>
+            </div>
+
+
+        </div>
+
+        <div class="card">
+            <h2>Пользователи</h2>
+            
+                
+                <form method="get" asp-action="Index" class="form-container">
+                    <input type="text" name="searchUser" placeholder="Имя или фамилия пользователя" />
+                    <button type="submit" class="btn">Поиск</button>
+                </form>
+            
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Имя</th>
+                        <th>Email</th>
+                        <th>Роль</th>
+                        <th>Изменить роль</th>
+                        <th>Удалить</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>@user.FirstName @user.LastName</td>
+                            <td>@user.Email</td>
+                            <td>@user.Role.RoleName</td>
+                            <td>
+                                <form asp-action="ChangeRole" method="post">
+                                    <input type="hidden" name="userId" value="@user.UserId" />
+                                    <select name="roleId">
+                                        <option value="3">Сотрудник</option>
+                                        <option value="2">Регистратор</option>
+                                        <option value="4">Менеджер</option>
+                                        <option value="1">Администратор</option>
+                                    </select>
+                                    <button type="submit" class="btn">Сохранить</button>
+                                </form>
+                            </td>
+                            <td>
+                                <form asp-action="DeleteUser" method="post">
+                                    <input type="hidden" name="userId" value="@user.UserId" />
+                                    <button type="submit" class="btn" style="background-color: crimson;">Удалить</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div id="pagination" class="pagination">
+                
+            </div>
+
+
+        </div>
+    </div>
+
+       
+
+    </div>
+</body>
+</html>

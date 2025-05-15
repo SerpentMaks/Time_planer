@@ -1,0 +1,131 @@
+﻿@model Time_planer.Models.EmployeeDashboardViewModel
+
+@{
+    ViewBag.Title = "Моя панель";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/css/styles.css" />
+</head>
+<body>
+    @functions {
+        public string FormatHours(decimal? hours)
+        {
+            var rounded = Math.Round(hours.Value, 2);
+            int value = (int)Math.Floor(rounded);
+            string suffix;
+
+
+            suffix = "час.";
+
+
+            return $"{rounded} {suffix}";
+        }
+    }
+
+    <div style="position: absolute; top: 10px; right: 20px;">
+        <a asp-controller="Account" asp-action="Logout" class="btn" method="post">Выйти</a>
+    </div>
+    <div class="container">
+        <div class="card">
+            <h2>Добро пожаловать, @ViewBag.UserName!</h2>
+            <h3>Общее отработанное время: @FormatHours(ViewBag.TotalHours)</h3>
+            <h3>Осталось отпускных дней: @ViewBag.RemainingDays</h3>
+        </div>
+
+
+        <div class="card">
+            <h4>История рабочего времени:</h4>
+            
+    
+                <form method="get" asp-action="Index" class="form-container">
+                    <label>С:</label>
+                    <input type="date" name="start" />
+                    <label>По:</label>
+                    <input type="date" name="end" />
+                    <button type="submit" class="btn">Показать</button>
+                </form>
+            
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Дата начала</th>
+                        <th>Дата окончания</th>
+                        <th>Часы</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.WorkTimes)
+                    {
+                        <tr>
+                            <td>@entry.StartTime.ToString("g")</td>
+                            <td>@(entry.EndTime?.ToString("g") ?? "-")</td>
+                            <td>@(FormatHours(entry.TotalHours) ?? "-")</td>
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div id="pagination" class="pagination">
+                
+            </div>
+
+        </div>
+        
+
+        <div class="card">
+            <h4>Мои заявки на отпуск:</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Тип</th>
+                        <th>С даты</th>
+                        <th>По дату</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var leave in Model.LeaveRequests)
+                    {
+                        <tr>
+                            <td>@leave.LeaveType</td>
+                            <td>@leave.StartDate.ToShortDateString()</td>
+                            <td>@leave.EndDate.ToShortDateString()</td>
+                            <td>@leave.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+
+            <button type="button" id="toggleLeaveForm" class="btn" style="margin-bottom: 15px;">Новая заявка на отпуск</button>
+
+            <div id="leaveRequestForm" class="collapsible-form">
+                <h4>Подать заявку на отпуск:</h4>
+                <form asp-action="RequestLeave" asp-controller="Employee" method="post" class="form-container">
+                    <label for="leaveType">Тип отпуска:</label>
+                    <input type="text" name="leaveType" required />
+
+                    <label for="startDate">Начало:</label>
+                    <input type="date" name="startDate" required />
+
+                    <label for="endDate">Окончание:</label>
+                    <input type="date" name="endDate" required />
+
+                    <button type="submit" class="btn">Отправить заявку</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
