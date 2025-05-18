@@ -1,4 +1,3 @@
-```mermaid
 graph TD
   subgraph Клиент
     A[Пользователь (любой роли)]
